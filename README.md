@@ -38,6 +38,8 @@
     -callback app_isv(Context)-> boolean().
     -callback app_secret(Context)-> string().
     -callback app_key(Context)-> string().
+    -callback app_id(Context) -> string().
+    
 
 `Context` 是一个获取各配置的上下文，需要使用者去指定
 
@@ -46,6 +48,6 @@
 * `app_token`为`基础消息`中的`Token` (仅限ISV应用)
 * `app_key`为`基础消息`中的`数据加密密钥(ENCODING_AES_KEY)` (仅限ISV应用)
 * `app_isv`在ISV应用时应返回`true`
-
+* `app_id`为`基础消息`中的`AgentId`
 
 #### 消息处理handler

@@ -1,8 +1,9 @@
 -module(ai_ding_conf).
 
 -export([start/1]).
--export([app_token/1,app_secret/1,app_key/1,app_isv/1]).
+-export([app_token/1,app_secret/1,app_key/1,app_isv/1,app_id/1]).
 
+-callback app_id(Context :: term()) -> string().
 -callback app_token(Context :: term()) -> string().
 -callback app_secret(Context :: term())-> string().
 -callback app_key(Context :: term())-> string().
@@ -34,6 +35,9 @@ app_key(Ctx)->
     Backend = ai_ding_conf_module:backend(),
     Backend:app_key(Ctx).
 
+app_id(Ctx)->
+    Backend = ai_ding_conf_module:backend(),
+    Backend:app_id(Ctx).
 app_isv(Ctx)->
 		Backend = ai_ding_conf_module:backend(),
 		Backend:app_isv(Ctx).
