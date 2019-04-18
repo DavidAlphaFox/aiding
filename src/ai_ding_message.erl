@@ -1,31 +1,34 @@
 -module(ai_ding_message).
 -include("ai_ding.hrl").
--export([send_to_all/2,send_to_departs/3,send_to_users/3,send_to/4]).
+-export([send_to_all/3,send_to_departs/4,send_to_users/4,send_to/5]).
 
-send_to_all(AgentID,Message)-> 
-    send_to(AgentID,Message,undefined,undefined).
-send_to_departs(AgentID,Message,DepartList)->
-    send_to(AgentID,Message,DepartList,undefined).
-send_to_users(AgentID,Message,UserList)->
-    send_to(AgentID,Message,undefined,UserList).
-send_to(AgentID,Content,DepartList,UserList)->
+send_to_all(AgentID,AccessToken,Message)-> 
+    send_to(AgentID,AccessToken,Message,undefined,undefined).
+send_to_departs(AgentID,AccessToken,Message,DepartList)->
+    send_to(AgentID,AccessToken,Message,DepartList,undefined).
+send_to_users(AgentID,AccessToken,Message,UserList)->
+    send_to(AgentID,AccessToken,Message,undefined,UserList).
+send_to(AgentID,AccessToken,Content,DepartList,UserList)->
     Message = build(Content#ai_ding_message.type,Content#ai_ding_message.content),
     Base = [
             {<<"agent_id">>,AgentID},
             {<<"msg">>,Message}
            ],
-    case {DepartList,UserList} of 
-        {undefined,undefined} ->
-            [{<<"to_all_user">>,true} | Base];
-        {_,undefined}->
-            [{<<"dept_id_list">>,DepartList} | Base];
-        {undefined,_}->
-            [{<<"userid_list">>,UserList} | Base];
-        _ ->
-            [{<<"dept_id_list">>,DepartList} ,
-             {<<"userid_list">>,UserList}
-             | Base]
-    end.
+    Message0 =
+        case {DepartList,UserList} of 
+            {undefined,undefined} ->
+                [{<<"to_all_user">>,true} | Base];
+            {_,undefined}->
+                [{<<"dept_id_list">>,DepartList} | Base];
+            {undefined,_}->
+                [{<<"userid_list">>,UserList} | Base];
+            _ ->
+                [{<<"dept_id_list">>,DepartList} ,
+                 {<<"userid_list">>,UserList}
+                 | Base]
+        end,
+    Req = ai_ding_request:request(?DING_OAPI_MESSAGE_CORP_ASYNC,[{<<"access_token">>,AccessToken}],jsx:encode(Message0)),
+    ai_ding_http:exec(Req).
 
 build(text,Content)->
     Content0 = ai_string:to_string(Content),
