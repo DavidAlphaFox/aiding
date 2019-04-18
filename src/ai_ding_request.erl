@@ -1,5 +1,6 @@
 -module(ai_ding_request).
 -include("priv/ai_ding_internal.hrl").
+-include("ai_ding.hrl").
 
 -export([request/2]).
 

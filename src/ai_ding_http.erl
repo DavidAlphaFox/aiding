@@ -2,9 +2,8 @@
 -include_lib("aihttp/include/ai_url.hrl").
 -include("priv/ai_ding_internal.hrl").
 
--export([post/3,post_multipart/3]).
-
--export([get/1]).
+-export([get/1,post/3,post_multipart/3]).
+-export([exec/1]).
 
 -define(DING_COMMON_HEADERS,[
                              {<<"Content-Type">>, <<"application/json">>},
@@ -25,20 +24,24 @@ query(URL,Query)->
     ai_url:build(Parsed0).
 
 
+exec(Request)->
+    Method = Request#ai_ding_request.method,
+    ai_ding_http:Method(Request).
+
 get(Request)->
-    {ok, ConnPid} = gun:open(?DING_HOST,443, #{transport => tls}),
+    {ok, ConnPid} = gun:open(?DING_HOST,443, #{transport => tls,protocols => [http]}),
     {ok, _Protocol} = gun:await_up(ConnPid),
     Path = Request#ai_ding_request.url,
     Params = Request#ai_ding_request.params,
-    Headers = Request#ai_ding_request.headers,
+    ReqHeaders = Request#ai_ding_request.headers,
     Path0 = query(Path,Params),
-    Headers0 = ai_proplists:merge(Headers,?DING_COMMON_HEADERS),
-    StreamRef = gun:get(ConnPid,Path0,Headers0),
+    ReqHeaders0 = ai_proplists:merge(ReqHeaders,?DING_COMMON_HEADERS),
+    StreamRef = gun:get(ConnPid,Path0,ReqHeaders0),
     case gun:await(ConnPid, StreamRef) of
-        {response, fin, Status, Headers} -> {Status,Headers};
-        {response, nofin, Status, Headers} ->
+        {response, fin, Status, RepHeaders} -> {Status,RepHeaders};
+        {response, nofin, Status, RepHeaders} ->
             {ok, Body} = gun:await_body(ConnPid, StreamRef),
-            {Status,Headers,jsx:decode(Body)}
+            {Status,RepHeaders,jsx:decode(Body)}
     end.
 post(HOST,Path, ReqBody) ->
     {ok, ConnPid} = gun:open(HOST,443, #{transport => tls}),

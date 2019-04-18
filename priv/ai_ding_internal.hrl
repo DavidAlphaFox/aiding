@@ -9,5 +9,4 @@
 
 -type ai_ding_request() :: #ai_ding_request{}.
 
--define(DING_HOST,<<"oapi.dingtalk.com">>).
--define(DING_OAPI_GETTOKEN,<<"dingtalk.oapi.gettoken">>).
+-define(DING_HOST,"oapi.dingtalk.com").
