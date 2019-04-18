@@ -23,7 +23,31 @@ new(Name,Url,Params,Method)->
 %%
 -spec request(binary(),proplists:proplists()) -> ai_ding_request().
 request(?DING_OAPI_GETTOKEN,Params)->
-    new(?DING_OAPI_GETTOKEN,<<"/gettoken">>,Params).
+    new(?DING_OAPI_GETTOKEN,<<"/gettoken">>,Params);
+%% 
+%% @doc 获取部门列表
+%% @params Params中的key为access_token,lang,fetch_child,id 其中access_token和id为必须参数
+%%         如果id不传，经默认为1,fetch_child ISV微应用固定传递false,lang 默认zh_CN
+%%
+request(?DING_OAPI_DEPARTMENT_LIST,Params) ->
+    Params0 =
+        case proplists:get_value(<<"id">>,Params) of
+            undefined -> [{<<"id">>,1}|Params];
+            _ -> Params
+        end,
+    new(?DING_OAPI_DEPARTMENT_LIST,<<"/department/list">>,Params0);
+%% 
+%% @doc 查询指定用户的所有上级父部门路径
+%% @params Params中的key为access_token,userId
+%%
+request(?DING_OAPI_USER_PARENT_DEPARTMENTS,Params) ->
+    new(?DING_OAPI_USER_PARENT_DEPARTMENTS,<<"/department/list_parent_depts">>,Params).
+
+%%
+%% @doc 发送工作通知消息
+%% @params Params中的key为access_token
+%% @params Body为ai_ding_message中所构建的message消息体
+%%
 request(?DING_OAPI_MESSAGE_CORP_ASYNC,Params,Body)->
     Req0 = new(?DING_OAPI_MESSAGE_CORP_ASYNC,<<"/topapi/message/corpconversation/asyncsend_v2">>,Params,post),
     Req0#ai_ding_request{body = Body}.

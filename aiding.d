@@ -2,6 +2,7 @@
 
 src/ai_ding_http.erl:: /Users/david/Documents/workspace/ai/aiding/deps/aihttp/include/ai_url.hrl; @touch $@
 src/ai_ding_message.erl:: include/ai_ding.hrl; @touch $@
+src/ai_ding_organization.erl:: include/ai_ding.hrl; @touch $@
 src/ai_ding_request.erl:: include/ai_ding.hrl; @touch $@
 
 COMPILE_FIRST +=
