@@ -3,6 +3,7 @@
 
 -export([request/2]).
 
+new(Name,Url)-> new(Name,Url,[]).
 new(Name,Url,Params)-> new(Name,Url,Params,get).
 new(Name,Url,Params,Method)->
     #ai_ding_request{
@@ -21,5 +22,5 @@ new(Name,Url,Params,Method)->
 %%
 -spec request(binary(),proplists:proplists()) -> ai_ding_request().
 request(?DING_OAPI_GETTOKEN,Params)->
-    new(?DING_OAPI_GETTOKEN,<<"https://oapi.dingtalk.com/gettoken">>,Params).
+    new(?DING_OAPI_GETTOKEN,<<"/gettoken">>,Params).
 

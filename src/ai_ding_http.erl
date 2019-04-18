@@ -1,16 +1,39 @@
 -module(ai_ding_http).
+-include_lib("aihttp/include/ai_url.hrl").
+-include("priv/ai_ding_internal.hrl").
 
--export([get/2,post/3,post_multipart/3]).
+-export([post/3,post_multipart/3]).
 
-get(HOST,Path)->
-    {ok, ConnPid} = gun:open(HOST,443, #{transport => tls}),
+-export([get/1]).
+
+-define(DING_COMMON_HEADERS,[
+                             {<<"Content-Type">>, <<"application/json">>},
+                             {<<"accept">>, "application/json"},
+                             {<<"user-agent">>, "ai_ding/0.1.0"}
+                            ]).
+
+
+query(URL,Query)->
+    Parsed = ai_url:parse(URL),
+    Q1 =
+        case Parsed#ai_url.qs of 
+            undefined -> [];
+            QS -> QS 
+        end,
+    Q2 = ai_proplists:merge(Query,Q1),
+    Parsed0 = Parsed#ai_url{qs = Q2},
+    ai_url:build(Parsed0).
+
+
+get(Request)->
+    {ok, ConnPid} = gun:open(?DING_HOST,443, #{transport => tls}),
     {ok, _Protocol} = gun:await_up(ConnPid),
-
-    StreamRef = gun:get(ConnPid,Path,[
-        {<<"Content-Type">>, <<"application/json">>},
-        {<<"accept">>, "application/json"},
-        {<<"user-agent">>, "ai_ding/0.1.0"}
-    ]),
+    Path = Request#ai_ding_request.url,
+    Params = Request#ai_ding_request.params,
+    Headers = Request#ai_ding_request.headers,
+    Path0 = query(Path,Params),
+    Headers0 = ai_proplists:merge(Headers,?DING_COMMON_HEADERS),
+    StreamRef = gun:get(ConnPid,Path0,Headers0),
     case gun:await(ConnPid, StreamRef) of
         {response, fin, Status, Headers} -> {Status,Headers};
         {response, nofin, Status, Headers} ->
