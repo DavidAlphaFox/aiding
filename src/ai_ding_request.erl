@@ -64,7 +64,25 @@ request(?DING_OAPI_USER_PARENT_DEPARTMENTS,Params) ->
 %% @params Params中的key为access_token,id
 %%
 request(?DING_OAPI_DEPARTMENT_PARENT_DEPARTMENTS,Params) ->
-    new(?DING_OAPI_DEPARTMENT_PARENT_DEPARTMENTS,<<"/department/list_parent_depts_by_dept">>,Params).
+    new(?DING_OAPI_DEPARTMENT_PARENT_DEPARTMENTS,<<"/department/list_parent_depts_by_dept">>,Params);
+request(?DING_OAPI_DEPARTMENT_MEMBER,Params) ->
+    new(?DING_OAPI_DEPARTMENT_MEMBER,<<"/user/getDeptMember">>,Params);
+request(?DING_OAPI_DEPARTMENT_MEMBER_PAGE,Params) ->
+    Offset = proplists:get_value(<<"offset">>,Params),
+    Size = proplists:get_value(<<"size">>,Params),
+    Params0 = 
+        case {Offset,Size} of
+            {undefined,undefined} ->
+                [{<<"offset">>,0},{<<"size">>,100}|Params];
+            {_,undefined} ->
+                [{<<"size">>,100}|Params];
+            {undefined,_} ->
+                [{<<"offset">>,0}|Params];
+            _-> Params
+        end,
+    new(?DING_OAPI_DEPARTMENT_MEMBER_PAGE,<<"/user/simplelist">>,Params0).
+
+
 
 %%
 %% @doc 发送工作通知消息

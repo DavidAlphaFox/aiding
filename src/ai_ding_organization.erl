@@ -6,6 +6,10 @@
 -export([departments_id/2,departments_id/1]).
 -export([department_parent_departments/2,user_parent_departments/2]).
 
+-export([department_member/1,department_member/2,
+        department_member_page/1,department_member_page/2,
+        department_member_page/4,department_member_page/5]).
+
 department(AccessToken,DepartID)->
     department(AccessToken,DepartID,<<"zh_CN">>).
 department(AccessToken,DepartID,Lang)->
@@ -49,4 +53,31 @@ department_parent_departments(AccessToken,DepartID)->
                                    {<<"access_token">>,AccessToken},
                                    {<<"id">>,DepartID}
                                   ]),
+    ai_ding_http:exec(Req).
+
+department_member(AccessToken)->
+    department_member(AccessToken,1).
+department_member(AccessToken,DepartID)->
+    Req = ai_ding_request:request(?DING_OAPI_DEPARTMENT_MEMBER,
+                                  [
+                                   {<<"access_token">>,AccessToken},
+                                   {<<"deptId">>,DepartID}
+                                  ]),
+    ai_ding_http:exec(Req).
+department_member_page(AccessToken)->
+    department_member_page(AccessToken,1).
+department_member_page(AccessToken,DepartID)->
+    department_member_page(AccessToken,DepartID,0,100).
+department_member_page(AccessToken,DepartID,Offset,Size)->
+    department_member_page(AccessToken,DepartID,Offset,Size,[]).
+department_member_page(AccessToken,DepartID,Offset,Size,Others)->
+    Base =
+        [
+         {<<"access_token">>,AccessToken},
+         {<<"department_id">>,DepartID},
+         {<<"offset">>,Offset},
+         {<<"size">>,Size}
+        ],
+    Params = ai_proplists:merge(Others,Base),
+    Req = ai_ding_request:request(?DING_OAPI_DEPARTMENT_MEMBER_PAGE,Params),
     ai_ding_http:exec(Req).
