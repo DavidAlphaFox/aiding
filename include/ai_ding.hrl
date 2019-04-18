@@ -1,1 +1,2 @@
 -define(DING_OAPI_GETTOKEN,<<"dingtalk.oapi.gettoken">>).
+-define(DING_OAPI_MESSAGE_CORP_ASYNC,<<"dingtalk.oapi.message.corpconversation.asyncsend_v2">>).

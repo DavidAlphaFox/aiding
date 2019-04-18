@@ -2,7 +2,7 @@
 -include("priv/ai_ding_internal.hrl").
 -include("ai_ding.hrl").
 
--export([request/2]).
+-export([request/2,request/3]).
 
 new(Name,Url)-> new(Name,Url,[]).
 new(Name,Url,Params)-> new(Name,Url,Params,get).
@@ -24,4 +24,7 @@ new(Name,Url,Params,Method)->
 -spec request(binary(),proplists:proplists()) -> ai_ding_request().
 request(?DING_OAPI_GETTOKEN,Params)->
     new(?DING_OAPI_GETTOKEN,<<"/gettoken">>,Params).
+request(?DING_OAPI_MESSAGE_CORP_ASYNC,Params,Body)->
+    Req0 = new(?DING_OAPI_MESSAGE_CORP_ASYNC,<<"/topapi/message/corpconversation/asyncsend_v2">>,Params,post),
+    Req0#ai_ding_request{body = Body}.
 

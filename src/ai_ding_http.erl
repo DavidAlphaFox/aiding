@@ -2,7 +2,7 @@
 -include_lib("aihttp/include/ai_url.hrl").
 -include("priv/ai_ding_internal.hrl").
 
--export([get/1,post/3,post_multipart/3]).
+-export([get/1,post/1,post_multipart/3]).
 -export([exec/1]).
 
 -define(DING_COMMON_HEADERS,[
@@ -40,23 +40,27 @@ get(Request)->
     case gun:await(ConnPid, StreamRef) of
         {response, fin, Status, RepHeaders} -> {Status,RepHeaders};
         {response, nofin, Status, RepHeaders} ->
-            {ok, Body} = gun:await_body(ConnPid, StreamRef),
-            {Status,RepHeaders,jsx:decode(Body)}
+            {ok, RepBody} = gun:await_body(ConnPid, StreamRef),
+            {Status,RepHeaders,jsx:decode(RepBody)}
     end.
-post(HOST,Path, ReqBody) ->
-    {ok, ConnPid} = gun:open(HOST,443, #{transport => tls}),
+post(Request)->
+    {ok, ConnPid} = gun:open(?DING_HOST,443, #{transport => tls,protocols => [http]}),
     {ok, _Protocol} = gun:await_up(ConnPid),
-
-    StreamRef = gun:post(ConnPid,Path,[
-        {<<"Content-Type">>, <<"application/json">>},
-        {<<"accept">>, "application/json"},
-        {<<"user-agent">>, "ai_ding/0.1.0"}
-    ],ReqBody),
+    Path = Request#ai_ding_request.url,
+    Params = Request#ai_ding_request.params,
+    ReqHeaders = Request#ai_ding_request.headers,
+    Path0 = query(Path,Params),
+    ReqHeaders0 = ai_proplists:merge(ReqHeaders,?DING_COMMON_HEADERS),
+    StreamRef = 
+        case Request#ai_ding_request.body of 
+            undefined -> gun:post(ConnPid,Path0,ReqHeaders0);
+            ReqBody -> gun:post(ConnPid,Path0,ReqHeaders0,ReqBody)
+        end,
     case gun:await(ConnPid, StreamRef) of
-        {response, fin, Status, Headers} -> {Status,Headers};
-        {response, nofin, Status, Headers} ->
-            {ok, ResBody} = gun:await_body(ConnPid, StreamRef),
-            {Status,Headers,jsx:decode(ResBody)}
+        {response, fin, Status, RepHeaders} -> {Status,RepHeaders};
+        {response, nofin, Status, RepHeaders} ->
+            {ok, RepBody} = gun:await_body(ConnPid, StreamRef),
+            {Status,RepHeaders,jsx:decode(RepBody)}
     end.
 post_multipart(HOST,Path,File)->
     {ok, ConnPid} = gun:open(HOST,443, #{transport => tls}),
