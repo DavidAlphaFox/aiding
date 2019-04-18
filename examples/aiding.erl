@@ -2,6 +2,7 @@
 
 %% API
 -export([start/0]).
+-export([run/0]).
 
 start() ->
     ok = application:start(crypto),
@@ -16,3 +17,5 @@ start() ->
     ok = application:start(jsx),
     ok = application:start(ailib),
     ok = application:start(aihttp).
+run()->
+    ai_ding_conf:start(ex_ding_conf).

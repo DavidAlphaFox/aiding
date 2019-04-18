@@ -20,3 +20,4 @@ log
 .erlang.mk
 deps
 aiwx.d
+examples/ex_ding_conf.erl

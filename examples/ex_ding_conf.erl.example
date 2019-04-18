@@ -1,0 +1,9 @@
+-module(ex_ding_conf).
+-export([app_token/1,app_isv/1,app_id/1]).
+-export([app_key/1,app_secret/1]).
+
+app_token(_Context) -> <<"">>.
+app_isv(_Context)-> false.
+app_secret(_Context)-> <<"">>.
+app_key(_Context)-> <<"">>.
+app_id(_Context) -> <<"">>.
