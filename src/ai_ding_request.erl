@@ -41,7 +41,13 @@ request(?DING_OAPI_DEPARTMENT_LIST,Params) ->
 %% @params Params中的key为access_token,userId
 %%
 request(?DING_OAPI_USER_PARENT_DEPARTMENTS,Params) ->
-    new(?DING_OAPI_USER_PARENT_DEPARTMENTS,<<"/department/list_parent_depts">>,Params).
+    new(?DING_OAPI_USER_PARENT_DEPARTMENTS,<<"/department/list_parent_depts">>,Params);
+%%
+%% @doc 查询部门的所有上级父部门路径
+%% @params Params中的key为access_token,id
+%%
+request(?DING_OAPI_DEPARTMENT_PARENT_DEPARTMENTS,Params) ->
+    new(?DING_OAPI_DEPARTMENT_PARENT_DEPARTMENTS,<<"/department/list_parent_depts_by_dept">>,Params).
 
 %%
 %% @doc 发送工作通知消息
