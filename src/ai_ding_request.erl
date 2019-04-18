@@ -37,6 +37,23 @@ request(?DING_OAPI_DEPARTMENT_LIST,Params) ->
         end,
     new(?DING_OAPI_DEPARTMENT_LIST,<<"/department/list">>,Params0);
 %% 
+%% @doc 获取子部门ID列表
+%% @params Params中的key为access_token,id,如果id不传，经默认为1
+%%
+request(?DING_OAPI_DEPARTMENT_ID_LIST,Params) ->
+    Params0 =
+        case proplists:get_value(<<"id">>,Params) of
+            undefined -> [{<<"id">>,1}|Params];
+            _ -> Params
+        end,
+    new(?DING_OAPI_DEPARTMENT_ID_LIST,<<"/department/list_ids">>,Params0);
+%% 
+%% @doc 获取部门详情
+%% @params Params中的key为access_token,id,lang
+%%
+request(?DING_OAPI_DEPARTMENT,Params) ->
+    new(?DING_OAPI_DEPARTMENT,<<"/department/get">>,Params);
+%% 
 %% @doc 查询指定用户的所有上级父部门路径
 %% @params Params中的key为access_token,userId
 %%
