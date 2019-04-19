@@ -8,39 +8,41 @@ corp_send_to_departs(AgentID,AccessToken,Message,DepartList)->
     corp_send_to(AgentID,AccessToken,Message,DepartList,undefined).
 corp_send_to_users(AgentID,AccessToken,Message,UserList)->
     corp_send_to(AgentID,AccessToken,Message,undefined,UserList).
-corp_send_to(AgentID,AccessToken,Content,DepartList,UserList)->
-    Message = build(Content#ai_ding_message.type,Content#ai_ding_message.content),
-    Base = [
-            {<<"agent_id">>,AgentID},
-            {<<"msg">>,Message}
-           ],
-    Message0 =
-        case {DepartList,UserList} of 
-            {undefined,undefined} ->
-                [{<<"to_all_user">>,true} | Base];
-            {_,undefined}->
-                ToAll = lists:any(fun(Depart) -> (Depart == 1) or (Depart == <<"1">>) or (Depart == "1") end,DepartList ),
-                if
-                    ToAll == true -> [{<<"to_all_user">>,true} | Base];
-                    true ->
-                        DepartList0 = ai_string:join(DepartList,<<",">>),
-                        [{<<"dept_id_list">>,DepartList0}| Base]
-                end;
-            {undefined,_}->
-                UserList0 = ai_string:join(UserList,<<",">>),
-                [{<<"userid_list">>,UserList0} | Base];
-            _ ->
-                ToAll = lists:any(fun(Depart) -> (Depart == 1) or (Depart == <<"1">>) or (Depart == "1") end,DepartList ),
-                if 
-                    ToAll == true -> [{<<"to_all_user">>,true} | Base];
-                    true ->
-                        DepartList0 = ai_string:join(DepartList,<<",">>),
-                        UserList0 = ai_string:join(UserList,<<",">>),
-                        [{<<"dept_id_list">>,DepartList0} ,
-                         {<<"userid_list">>,UserList0}
-                         | Base]
-                end
+
+corp_send_to(AgentID,AccessToken,Content,undefined,undefined)->
+    corp_send_to(AgentID,AccessToken,Content,[{<<"to_all_user">>,true}]);
+corp_send_to(AgentID,AccessToken,Content,DepartList,undefined)->
+    ToAll = lists:any(fun(Depart) -> (Depart == 1) or (Depart == <<"1">>) or (Depart == "1") end,DepartList ),
+    Other = 
+        if
+            ToAll == true -> [{<<"to_all_user">>,true}];
+            true ->
+                DepartList0 = ai_string:join(DepartList,<<",">>),
+                [{<<"dept_id_list">>,DepartList0}]
         end,
+    corp_send_to(AgentID,AccessToken,Content,Other);
+corp_send_to(AgentID,AccessToken,Content,undefined,UserList)->
+    UserList0 = ai_string:join(UserList,<<",">>),
+    corp_send_to(AgentID,AccessToken,Content,[{<<"userid_list">>,UserList0}]);
+corp_send_to(AgentID,AccessToken,Content,DepartList,UserList)->
+    ToAll = lists:any(fun(Depart) -> (Depart == 1) or (Depart == <<"1">>) or (Depart == "1") end,DepartList ),
+    Other = 
+        if 
+            ToAll == true -> [{<<"to_all_user">>,true}];
+            true ->
+                DepartList0 = ai_string:join(DepartList,<<",">>),
+                UserList0 = ai_string:join(UserList,<<",">>),
+                [{<<"dept_id_list">>,DepartList0} ,
+                 {<<"userid_list">>,UserList0}
+                ]
+        end,
+    corp_send_to(AgentID,AccessToken,Content,Other).
+
+corp_send_to(AgentID,AccessToken,Content,Other)->
+    Message = build(Content#ai_ding_message.type,Content#ai_ding_message.content),
+    Message0 = [
+                {<<"agent_id">>,AgentID},
+                {<<"msg">>,Message} | Other],
     Req = ai_ding_request:request(?DING_OAPI_MESSAGE_CORP_ASYNC,[{<<"access_token">>,AccessToken}],jsx:encode(Message0)),
     ai_ding_http:exec(Req).
 
