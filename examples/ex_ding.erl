@@ -3,7 +3,7 @@
 -include("ai_ding.hrl").
 -export([all_users_id/0,all_users/0]).
 -export([organization/0]).
--export([send_to_user/1,send_to_depart/1]).
+-export([corp_send_to_user/1,corp_send_to_depart/1]).
 access_token()->
     case erlang:get(access_token) of 
         undefined ->
@@ -74,17 +74,17 @@ fetch_departments()->
             erlang:put(access_token,undefined),
             fetch_departments()
     end.
-send_to_user(UserID)->
+corp_send_to_user(UserID)->
     AgentID = ai_ding_conf:app_id(undefined),
     AccessToken = access_token(),
-    ai_ding_message:send_to_users(AgentID,AccessToken,#ai_ding_message{
+    ai_ding_message:corp_send_to_users(AgentID,AccessToken,#ai_ding_message{
                                                          type = text,
                                                          content = <<"单条测试消息"/utf8>>
                                                         },UserID).
-send_to_depart(DepartID)->
+corp_send_to_depart(DepartID)->
     AgentID = ai_ding_conf:app_id(undefined),
     AccessToken = access_token(),
-    ai_ding_message:send_to_departs(AgentID,AccessToken,#ai_ding_message{
+    ai_ding_message:corp_send_to_departs(AgentID,AccessToken,#ai_ding_message{
                                                          type = text,
                                                          content = <<"部门测试消息"/utf8>>
                                                         },DepartID).

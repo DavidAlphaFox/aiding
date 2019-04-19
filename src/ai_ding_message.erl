@@ -1,14 +1,14 @@
 -module(ai_ding_message).
 -include("ai_ding.hrl").
--export([send_to_all/3,send_to_departs/4,send_to_users/4,send_to/5]).
+-export([corp_send_to_all/3,corp_send_to_departs/4,corp_send_to_users/4,corp_send_to/5]).
 
-send_to_all(AgentID,AccessToken,Message)-> 
-    send_to(AgentID,AccessToken,Message,undefined,undefined).
-send_to_departs(AgentID,AccessToken,Message,DepartList)->
-    send_to(AgentID,AccessToken,Message,DepartList,undefined).
-send_to_users(AgentID,AccessToken,Message,UserList)->
-    send_to(AgentID,AccessToken,Message,undefined,UserList).
-send_to(AgentID,AccessToken,Content,DepartList,UserList)->
+corp_send_to_all(AgentID,AccessToken,Message)-> 
+    corp_send_to(AgentID,AccessToken,Message,undefined,undefined).
+corp_send_to_departs(AgentID,AccessToken,Message,DepartList)->
+    corp_send_to(AgentID,AccessToken,Message,DepartList,undefined).
+corp_send_to_users(AgentID,AccessToken,Message,UserList)->
+    corp_send_to(AgentID,AccessToken,Message,undefined,UserList).
+corp_send_to(AgentID,AccessToken,Content,DepartList,UserList)->
     Message = build(Content#ai_ding_message.type,Content#ai_ding_message.content),
     Base = [
             {<<"agent_id">>,AgentID},
@@ -19,13 +19,27 @@ send_to(AgentID,AccessToken,Content,DepartList,UserList)->
             {undefined,undefined} ->
                 [{<<"to_all_user">>,true} | Base];
             {_,undefined}->
-                [{<<"dept_id_list">>,DepartList} | Base];
+                ToAll = lists:any(fun(Depart) -> (Depart == 1) or (Depart == <<"1">>) or (Depart == "1") end,DepartList ),
+                if
+                    ToAll == true -> [{<<"to_all_user">>,true} | Base];
+                    true ->
+                        DepartList0 = ai_string:join(DepartList,<<",">>),
+                        [{<<"dept_id_list">>,DepartList0}| Base]
+                end;
             {undefined,_}->
-                [{<<"userid_list">>,UserList} | Base];
+                UserList0 = ai_string:join(UserList,<<",">>),
+                [{<<"userid_list">>,UserList0} | Base];
             _ ->
-                [{<<"dept_id_list">>,DepartList} ,
-                 {<<"userid_list">>,UserList}
-                 | Base]
+                ToAll = lists:any(fun(Depart) -> (Depart == 1) or (Depart == <<"1">>) or (Depart == "1") end,DepartList ),
+                if 
+                    ToAll == true -> [{<<"to_all_user">>,true} | Base];
+                    true ->
+                        DepartList0 = ai_string:join(DepartList,<<",">>),
+                        UserList0 = ai_string:join(UserList,<<",">>),
+                        [{<<"dept_id_list">>,DepartList0} ,
+                         {<<"userid_list">>,UserList0}
+                         | Base]
+                end
         end,
     Req = ai_ding_request:request(?DING_OAPI_MESSAGE_CORP_ASYNC,[{<<"access_token">>,AccessToken}],jsx:encode(Message0)),
     ai_ding_http:exec(Req).
