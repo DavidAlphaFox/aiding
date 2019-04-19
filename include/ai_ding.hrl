@@ -59,6 +59,7 @@
 -define(DING_OAPI_DEPARTMENT_PARENT_DEPARTMENTS,<<"dingtalk.oapi.department.list_parent_depts_by_dept">>).
 %% @doc 获取部门用户userid列表
 -define(DING_OAPI_DEPARTMENT_MEMBER,<<"dingtalk.oapi.user.getDeptMember">>).
+%% @doc 获取部门用户
+-define(DING_OAPI_DEPARTMENT_MEMBER_PAGE,<<"dingtalk.oapi.user.simplelist">>).
 %% @doc 获取部门用户详情
--define(DING_OAPI_DEPARTMENT_MEMBER_PAGE,<<"dingtalk.oapi.user.listbypage">>).
-
+-define(DING_OAPI_DEPARTMENT_MEMBER_DETAILS,<<"dingtalk.oapi.user.listbypage">>).

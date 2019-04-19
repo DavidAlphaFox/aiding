@@ -80,7 +80,22 @@ request(?DING_OAPI_DEPARTMENT_MEMBER_PAGE,Params) ->
                 [{<<"offset">>,0}|Params];
             _-> Params
         end,
-    new(?DING_OAPI_DEPARTMENT_MEMBER_PAGE,<<"/user/simplelist">>,Params0).
+    new(?DING_OAPI_DEPARTMENT_MEMBER_PAGE,<<"/user/simplelist">>,Params0);
+request(?DING_OAPI_DEPARTMENT_MEMBER_DETAILS,Params) ->
+    Offset = proplists:get_value(<<"offset">>,Params),
+    Size = proplists:get_value(<<"size">>,Params),
+    Params0 = 
+        case {Offset,Size} of
+            {undefined,undefined} ->
+                [{<<"offset">>,0},{<<"size">>,100}|Params];
+            {_,undefined} ->
+                [{<<"size">>,100}|Params];
+            {undefined,_} ->
+                [{<<"offset">>,0}|Params];
+            _-> Params
+        end,
+    new(?DING_OAPI_DEPARTMENT_MEMBER_DETAILS,<<"/user/listbypage">>,Params0).
+
 
 
 
